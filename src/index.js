@@ -1,52 +1,26 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { legacy_createStore as createStore } from 'redux';
+import { legacy_createStore as createStore, bindActionCreators } from 'redux';
+import reducer from './reducer';
+import * as actions from './actions'
 
-const initialState = {value: 0}
+const store = createStore(reducer) 
 
-const reducer = (state = initialState, action) => {
-  switch (action.type) {
-    case 'INC':
-      return {
-        ...state, 
-        value: state.value + 1
-      };
-    case 'DEC':
-      return {
-        ...state, 
-        value: state.value - 1
-      };
-    case 'RND':
-      return {
-        ...state, 
-        value: state.value * action.payload
-      };
-    default:
-      return state
-  }
-}
+const {dispatch, subscribe, getState} = store
+
 const update = () => {
-  document.getElementById('counter').textContent = store.getState().value // отрисовываем стейт в UI
+  document.getElementById('counter').textContent = getState().value 
 }
 
-const store = createStore(reducer) // createStore создает стор моего приложения, аргументом как манипулятор идет редьюсер
-store.subscribe(update) // подписались на отслеживание каждого действия в сторе, выводим подписку аргументом, в нашем случае апдейтом
+subscribe(update) 
 
-const inc = () => ({type: 'INC'}) // actioncreator
-const dec = () => ({type: 'DEC'})
-const rnd = (value) => ({type: 'RND', payload: value}) // payload нужен чтобы не фаршмачить в стэйте напрямую
+const {inc, dec, rnd} = bindActionCreators(actions, dispatch)
 
-document.getElementById('inc').addEventListener('click', () => {
-  store.dispatch(inc())
-})
-
-document.getElementById('dec').addEventListener('click', () => {
-  store.dispatch(dec())
-})
-
+document.getElementById('inc').addEventListener('click', inc)
+document.getElementById('dec').addEventListener('click', dec)
 document.getElementById('rnd').addEventListener('click', () => {
   const value = Math.floor(Math.random() * 10)
-  store.dispatch(rnd(value)) // выводим в UI значение value
+  rnd(value)
 })
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
